@@ -6,7 +6,7 @@ class HTMLNode:
         self.props = props
         
     def to_html(self):
-        raise NotImplementedError("I'm not implemented yet")
+        raise NotImplementedError("to_html method not implemented")
     
     def props_to_html(self):
         html_props = ""
@@ -28,10 +28,31 @@ class LeafNode(HTMLNode):
         super().__init__(tag, value, None, props)
 
     def to_html(self):
-        if not self.value:
-            raise ValueError("All leaf nodes MUST have a value")
+        if self.value is None:
+            raise ValueError("invalid HTML: leaf nodes must have a value")
         
-        if not self.tag:
+        if self.tag is None:
             return self.value
         
         return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
+    
+    def __repr__(self):
+        return f"LeafNode(tag={self.tag}, value={self.value}, props={self.props})"
+    
+class ParentNode(HTMLNode):
+    def __init__(self, tag, children, props=None):
+        super().__init__(tag, None, children, props)
+
+    def to_html(self):
+        if self.tag is None:
+            raise ValueError("invalid HTML: parent nodes must have a tag")
+        
+        if self.children is None:
+            raise ValueError("invalid HTML: parent nodes must have children")
+        
+        children_html = ""
+        
+        for child in self.children:
+            children_html += child.to_html()
+        
+        return f"<{self.tag}{self.props_to_html()}>{children_html}</{self.tag}>"
